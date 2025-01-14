@@ -190,10 +190,12 @@ resource "aws_instance" "appserver2" {
 
 resource "aws_db_instance" "default" {
   allocated_storage    = 10
+  db_subnet_group_name = aws_db_subnet_group.default.id
   db_name              = "mydb"
   engine               = "mysql"
-  engine_version       = "8.0.35"
-  instance_class       = "db.t3.micro"
+  engine_version       = "8.0.39"
+  instance_class       = "db.t2.micro"
+  multi_az             = false
   username             = "admin"
   password             = "Raham#123568i"
   skip_final_snapshot  = true
