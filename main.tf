@@ -187,7 +187,7 @@ resource "aws_instance" "appserver2" {
 }
 
 # Create Database Instance
-resource "aws_db_instance" "default" {
+/*resource "aws_db_instance" "default" {
   allocated_storage    = 10
   db_subnet_group_name = aws_db_subnet_group.default.id
   db_name              = "mydb"
@@ -198,7 +198,7 @@ resource "aws_db_instance" "default" {
   username             = "admin"
   password             = "Raham#123568i"
   skip_final_snapshot  = true
-}
+}*/
 
 # Create DB Subnet Group
 resource "aws_db_subnet_group" "default" {
