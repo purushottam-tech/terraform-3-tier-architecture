@@ -359,11 +359,18 @@ output "lb_dns_name" {
 
 # Create S3 Bucket
 resource "aws_s3_bucket" "example" {
-  bucket = "rahamtestbycketterra7788abcdefxxc54hj6jfegfefgrg12"
+  bucket = "pipeline-bucket0808rr"
+}
 
-  tags = {
-    Name        = "rahamtestbycketterra7788abcdefxxc"
-    Environment = "Dev"
+resource "aws_s3_bucket_acl" "example" {
+  bucket = aws_s3_bucket.example.id
+  acl    = "private"
+}
+
+resource "aws_s3_bucket_versioning" "versioning_example" {
+  bucket = aws_s3_bucket.example.id
+  versioning_configuration {
+    status = "Enabled"
   }
 }
 
