@@ -37,12 +37,11 @@ resource "aws_subnet" "web-subnet-2" {
   cidr_block              = "10.0.2.0/24"
   availability_zone       = "ap-south-1b"
   map_public_ip_on_launch = true
- tags = {
+
+  tags = {
     Name = "Web-lb"
   }
 }
-
-
 
 # Create Application Private Subnet
 resource "aws_subnet" "application-subnet-1" {
@@ -106,11 +105,9 @@ resource "aws_internet_gateway" "igw" {
   }
 }
 
-
-# Create Web layber route table
+# Create Web Layer Route Table
 resource "aws_route_table" "web-rt" {
   vpc_id = aws_vpc.my-vpc.id
-
 
   route {
     cidr_block = "0.0.0.0/0"
@@ -122,7 +119,7 @@ resource "aws_route_table" "web-rt" {
   }
 }
 
-# Create Web Subnet association with Web route table
+# Create Web Subnet Associations with Web Route Table
 resource "aws_route_table_association" "a" {
   subnet_id      = aws_subnet.web-subnet-1.id
   route_table_id = aws_route_table.web-rt.id
@@ -133,7 +130,7 @@ resource "aws_route_table_association" "b" {
   route_table_id = aws_route_table.web-rt.id
 }
 
-#Create EC2 Instance
+# Create EC2 Web Instances
 resource "aws_instance" "webserver1" {
   ami                    = "ami-0973769d2c4406635"
   instance_type          = "t2.micro"
@@ -162,7 +159,7 @@ resource "aws_instance" "webserver2" {
   }
 }
 
-#Create EC2 Instance
+# Create EC2 App Instances
 resource "aws_instance" "appserver1" {
   ami                    = "ami-0973769d2c4406635"
   instance_type          = "t2.micro"
@@ -170,6 +167,7 @@ resource "aws_instance" "appserver1" {
   key_name               = "mumbai"
   vpc_security_group_ids = [aws_security_group.appserver-sg.id]
   subnet_id              = aws_subnet.application-subnet-1.id
+
   tags = {
     Name = "app Server-1"
   }
@@ -188,6 +186,7 @@ resource "aws_instance" "appserver2" {
   }
 }
 
+# Create Database Instance
 resource "aws_db_instance" "default" {
   allocated_storage    = 10
   db_subnet_group_name = aws_db_subnet_group.default.id
@@ -201,6 +200,7 @@ resource "aws_db_instance" "default" {
   skip_final_snapshot  = true
 }
 
+# Create DB Subnet Group
 resource "aws_db_subnet_group" "default" {
   name       = "main"
   subnet_ids = [aws_subnet.database-subnet-1.id, aws_subnet.database-subnet-2.id]
@@ -210,7 +210,6 @@ resource "aws_db_subnet_group" "default" {
   }
 }
 
-
 # Create Web Security Group
 resource "aws_security_group" "webserver-sg" {
   name        = "webserver-sg"
@@ -218,7 +217,7 @@ resource "aws_security_group" "webserver-sg" {
   vpc_id      = aws_vpc.my-vpc.id
 
   ingress {
-    description = "HTTP from VPC"
+    description = "SSH from VPC"
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
@@ -239,7 +238,8 @@ resource "aws_security_group" "webserver-sg" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
- tags = {
+
+  tags = {
     Name = "Web-SG"
   }
 }
@@ -255,15 +255,15 @@ resource "aws_security_group" "appserver-sg" {
     from_port       = 8080
     to_port         = 8080
     protocol        = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks     = ["0.0.0.0/0"]
   }
 
- ingress {
-    description     = "Allow traffic from web layer"
+  ingress {
+    description     = "Allow SSH from anywhere"
     from_port       = 22
     to_port         = 22
     protocol        = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks     = ["0.0.0.0/0"]
   }
 
   egress {
@@ -285,11 +285,11 @@ resource "aws_security_group" "database-sg" {
   vpc_id      = aws_vpc.my-vpc.id
 
   ingress {
-    description     = "Allow traffic from application layer"
+    description     = "Allow MySQL from app layer"
     from_port       = 3306
     to_port         = 3306
     protocol        = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks     = ["0.0.0.0/0"]
   }
 
   egress {
@@ -304,6 +304,7 @@ resource "aws_security_group" "database-sg" {
   }
 }
 
+# Create Application Load Balancer
 resource "aws_lb" "external-elb" {
   name               = "External-LB"
   internal           = false
@@ -350,15 +351,13 @@ resource "aws_lb_listener" "external-elb" {
   }
 }
 
-
-
-
+# Output for Load Balancer DNS name
 output "lb_dns_name" {
   description = "The DNS name of the load balancer"
   value       = aws_lb.external-elb.dns_name
 }
 
-
+# Create S3 Bucket
 resource "aws_s3_bucket" "example" {
   bucket = "rahamtestbycketterra7788abcdefxxc54hj6jfegfefgrg12"
 
@@ -368,17 +367,19 @@ resource "aws_s3_bucket" "example" {
   }
 }
 
+# IAM User Creation with ForEach
 resource "aws_iam_user" "one" {
-for_each = var.iam_users
-name = each.value
+  for_each = toset(var.iam_users)
+  name     = each.value
 }
 
 variable "iam_users" {
-description = ""
-type = set(string)
-default = ["userone", "usertwo", "userthree", "userfour"]
+  description = "A list of IAM users"
+  type        = set(string)
+  default     = ["userone", "usertwo", "userthree", "userfour"]
 }
 
+# IAM Group Creation
 resource "aws_iam_group" "two" {
-name = "devopswithawsbyrahamshaik"
+  name = "devopswithawsbyrahamshaik"
 }
