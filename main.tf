@@ -192,7 +192,7 @@ resource "aws_db_instance" "default" {
   db_subnet_group_name = aws_db_subnet_group.default.id
   db_name              = "mydb"
   engine               = "mysql"
-  engine_version       = "8.0.39"
+  engine_version       = "8.0.32"
   instance_class       = "db.t2.micro"
   multi_az             = false
   username             = "admin"
